@@ -4,10 +4,11 @@ from __future__ import absolute_import
 
 from soapfish.core import SOAPRequest
 from soapfish.soap_dispatch import SOAPDispatcher
+import logging
 
 __all__ = ['django_dispatcher']
 
-
+logger = logging.getLogger('soapfish')
 class DjangoEnvironWrapper(object):
 
     def __init__(self, environ):
@@ -33,6 +34,8 @@ def django_dispatcher(service, **dispatcher_kwargs):
 
         response = HttpResponse(soap_response.http_content)
         response.status_code = soap_response.http_status_code
+        if response.status_code >=300:
+            logger.error("Response with error %s %s", response.status_code, soap_response.http_content)
         for k, v in soap_response.http_headers.items():
             response[k] = v
         return response

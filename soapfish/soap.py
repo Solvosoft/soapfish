@@ -159,7 +159,7 @@ class Stub(object):
         data = soap.Envelope.response(tagname, parameter, header=header)
         headers = soap.build_http_request_headers(method.soapAction)
 
-        logger.info("Call '%s' on '%s'", operationName, self.location)
+
         logger.debug('Request Headers: %s', headers)
         logger.debug('Request Envelope: %s', data)
         kwargs={
@@ -169,6 +169,9 @@ class Stub(object):
         }
         kwargs.update(get_requests_ssl_context(self))
         r = requests.post(self.location, **kwargs)
+        logger.info("Call '%s' on '%s' status '%s'", operationName, self.location, r.status_code)
+        if r.status_code >= 300:
+            logger.error("Status code no success %s %s", r.status_code, r.content)
         logger.debug('Response Headers: %s', r.headers)
         logger.debug('Response Envelope: %s', r.content)
         return self._handle_response(method, r.headers, r.content)
